@@ -1,0 +1,335 @@
+[
+  {
+    "command": "docker --version && docker version --format 'Client: {{.Client.Version}} | Server: {{.Server.Version}}'",
+    "output": "Docker version 29.8.2, build 7fc2dff\nClient: 29.8.2 | Server: 29.8.2",
+    "returncode": 0,
+    "time": "2026-10-06 21:18:17",
+    "section": "1. Install Docker and verify the setup",
+    "title": "Docker client/server version",
+    "observation": "The client (CLI) talks to the Docker daemon (server) over a socket. Both versions confirm the installation works."
+  },
+  {
+    "command": "docker info --format 'Containers: {{.Containers}} | Images: {{.Images}} | Storage driver: {{.Driver}} | OS: {{.OperatingSystem}}'",
+    "output": "Containers: 0 | Images: 1 | Storage driver: overlayfs | OS: Docker Desktop",
+    "returncode": 0,
+    "time": "2026-10-06 21:18:17",
+    "section": "1. Install Docker and verify the setup",
+    "title": "Engine information",
+    "observation": "Shows the daemon's state, the storage driver (overlay2 is typical) and the host OS the engine runs on."
+  },
+  {
+    "command": "docker run --rm hello-world",
+    "output": "\nHello from Docker!\nThis message shows that your installation appears to be working correctly.\n\nTo generate this message, Docker took the following steps:\n 1. The Docker client contacted the Docker daemon.\n 2. The Docker daemon pulled the \"hello-world\" image from the Docker Hub.\n    (arm64v8)\n 3. The Docker daemon created a new container from that image which runs the\n    executable that produces the output you are currently reading.\n 4. The Docker daemon streamed that output to the Docker client, which sent it\n    to your terminal.\n\nTo try something more ambitious, you can run an Ubuntu container with:\n $ docker run -it ubuntu bash\n\nShare images, automate workflows, and more with a free Docker ID:\n https://hub.docker.com/\n\nFor more examples and ideas, visit:\n https://docs.docker.com/get-started/",
+    "returncode": 0,
+    "time": "2026-10-06 21:18:17",
+    "section": "1. Install Docker and verify the setup",
+    "title": "Run the hello-world test container",
+    "observation": "The daemon did not have the image locally, so it pulled it from Docker Hub, created a container, ran it, and streamed the output back to the CLI."
+  },
+  {
+    "command": "docker run -d --name dl-web -p 8080:80 nginx:alpine",
+    "output": "562445d82744770349bda1d3365204f0c3badd112b3cce1656a529d2d6b3c68e\n\n[stderr]\nUnable to find image 'nginx:alpine' locally\nalpine: Pulling from library/nginx\n1efec2485f45: Pulling fs layer\na9986cd6f37d: Pulling fs layer\nbc862a9910f5: Pulling fs layer\nccea4a153c59: Pulling fs layer\n943c389642fa: Pulling fs layer\n858f76146c12: Pulling fs layer\n766d3311d5df: Pulling fs layer\nd766d06974fa: Pulling fs layer\n858f76146c12: Download complete\nccea4a153c59: Download complete\nbc862a9910f5: Download complete\nd766d06974fa: Download complete\n766d3311d5df: Download complete\na9986cd6f37d: Download complete\na9986cd6f37d: Pull complete\n858f76146c12: Pull complete\nccea4a153c59: Pull complete\n766d3311d5df: Pull complete\n943c389642fa: Download complete\nbc862a9910f5: Pull complete\nd766d06974fa: Pull complete\n943c389642fa: Pull complete\ndffc70821449: Download complete\n6c2852a60c45: Download complete\n1efec2485f45: Download complete\n1efec2485f45: Pull complete\nDigest: sha256:df221db836e1754089190208cee7eeda94f233197056426eda74a43ab1abeac2\nStatus: Downloaded newer image for nginx:alpine",
+    "returncode": 0,
+    "time": "2026-10-06 21:18:19",
+    "section": "2. Create and manage containers",
+    "title": "Run a detached web container with port mapping",
+    "observation": "-d runs in the background, --name gives a friendly name, -p maps host port 8080 to container port 80."
+  },
+  {
+    "command": "docker ps",
+    "output": "CONTAINER ID   IMAGE          COMMAND                  CREATED                  STATUS                  PORTS                                     NAMES\n562445d82744   nginx:alpine   \"/docker-entrypoint.\u2026\"   Less than a second ago   Up Less than a second   0.0.0.0:8080->80/tcp, [::]:8080->80/tcp   dl-web",
+    "returncode": 0,
+    "time": "2026-10-06 21:18:29",
+    "section": "2. Create and manage containers",
+    "title": "List running containers",
+    "observation": "Shows container ID, image, command, status, port mapping and name of running containers."
+  },
+  {
+    "command": "curl -s -o /dev/null -w 'HTTP status: %{http_code}\\n' http://localhost:8080",
+    "output": "HTTP status: 200",
+    "returncode": 0,
+    "time": "2026-10-06 21:18:29",
+    "section": "2. Create and manage containers",
+    "title": "Call the container from the host",
+    "observation": "HTTP 200 proves the published port forwards host traffic into the container."
+  },
+  {
+    "command": "docker exec dl-web sh -c 'echo Hello from inside the container && nginx -v && hostname'",
+    "output": "Hello from inside the container\n562445d82744\n\n[stderr]\nnginx version: nginx/1.31.6",
+    "returncode": 0,
+    "time": "2026-10-06 21:18:29",
+    "section": "2. Create and manage containers",
+    "title": "Run a command inside the running container",
+    "observation": "docker exec starts an extra process inside an existing container; the hostname equals the container ID."
+  },
+  {
+    "command": "docker logs --tail 5 dl-web",
+    "output": "192.168.65.1 - - [06/Oct/2026:15:48:29 +0000] \"GET / HTTP/1.1\" 200 896 \"-\" \"curl/8.16.0\" \"-\"\n\n[stderr]\n2026/10/06 15:48:29 [notice] 1#1: start worker process 36\n2026/10/06 15:48:29 [notice] 1#1: start worker process 37\n2026/10/06 15:48:29 [notice] 1#1: start worker process 38\n2026/10/06 15:48:29 [notice] 1#1: start worker process 39",
+    "returncode": 0,
+    "time": "2026-10-06 21:18:29",
+    "section": "2. Create and manage containers",
+    "title": "View container logs",
+    "observation": "Logs capture the container's stdout/stderr (nginx access logs here)."
+  },
+  {
+    "command": "docker stats --no-stream dl-web",
+    "output": "CONTAINER ID   NAME      CPU %     MEM USAGE / LIMIT     MEM %     NET I/O          BLOCK I/O     PIDS\n562445d82744   dl-web    0.00%     10.25MiB / 7.748GiB   0.13%     1.63kB / 1.6kB   0B / 8.19kB   11",
+    "returncode": 0,
+    "time": "2026-10-06 21:18:29",
+    "section": "2. Create and manage containers",
+    "title": "Resource usage snapshot",
+    "observation": "Shows live CPU, memory, network and block I/O of the container."
+  },
+  {
+    "command": "docker inspect --format 'Name={{.Name}} State={{.State.Status}} IP={{.NetworkSettings.IPAddress}} Image={{.Config.Image}}' dl-web",
+    "output": "\n\n[stderr]\ntemplate parsing error: template: :1:60: executing \"\" at <.NetworkSettings.IPAddress>: map has no entry for key \"IPAddress\"",
+    "returncode": 1,
+    "time": "2026-10-06 21:18:30",
+    "section": "2. Create and manage containers",
+    "title": "Inspect container metadata",
+    "observation": "docker inspect returns the full JSON configuration; --format extracts specific fields."
+  },
+  {
+    "command": "docker pull python:3.11-slim",
+    "output": "3.11-slim: Pulling from library/python\n7ca0c331ecfd: Pulling fs layer\n9eb0fb93ee08: Pulling fs layer\nbbeda6b4abb7: Pulling fs layer\n73a63ac3ec4a: Pulling fs layer\n9eb0fb93ee08: Download complete\n7ca0c331ecfd: Download complete\n58b126dd1754: Download complete\n56f7c999317d: Download complete\nbbeda6b4abb7: Download complete\n73a63ac3ec4a: Download complete\nbbeda6b4abb7: Pull complete\n9eb0fb93ee08: Pull complete\n7ca0c331ecfd: Pull complete\n73a63ac3ec4a: Pull complete\nDigest: sha256:0dd364ba7e10242f07755449e3a3d0e35f9efd987952737b90def6709ab0c5ce\nStatus: Downloaded newer image for python:3.11-slim\ndocker.io/library/python:3.11-slim",
+    "returncode": 0,
+    "time": "2026-10-06 21:18:30",
+    "section": "3. Explore Docker images and registries",
+    "title": "Pull an image from the registry (Docker Hub)",
+    "observation": "Images are made of read-only layers identified by digests; layers already present are not downloaded again."
+  },
+  {
+    "command": "docker search tensorflow --limit 5",
+    "output": "NAME                    DESCRIPTION                                     STARS     OFFICIAL\ntensorflow/tensorflow   Official Docker images for the machine learn\u2026   2932      \nrocm/tensorflow         Tensorflow with ROCm backend support            86        \nphotoprism/tensorflow   TensorFlow for C Build Environment              0         \ncorpusops/tensorflow    https://github.com/corpusops/docker-tensorfl\u2026   0         \nrootpublic/tensorflow                                                   0",
+    "returncode": 0,
+    "time": "2026-10-06 21:18:44",
+    "section": "3. Explore Docker images and registries",
+    "title": "Search the registry",
+    "observation": "Docker Hub is the default public registry; search lists matching repositories with stars and official flags."
+  },
+  {
+    "command": "docker images",
+    "output": "IMAGE                ID             DISK USAGE   CONTENT SIZE   EXTRA\nhello-world:latest   5e2309035332       17.1kB         4.77kB        \nnginx:alpine         df221db836e1       93.9MB         27.1MB   U    \npython:3.11-slim     0dd364ba7e10        215MB         48.1MB",
+    "returncode": 0,
+    "time": "2026-10-06 21:18:45",
+    "section": "3. Explore Docker images and registries",
+    "title": "List local images",
+    "observation": "Shows repository, tag, image ID, creation date and size of each local image."
+  },
+  {
+    "command": "docker history python:3.11-slim",
+    "output": "IMAGE          CREATED        CREATED BY                                      SIZE      COMMENT\n0dd364ba7e10   14 hours ago   CMD [\"python3\"]                                 0B        buildkit.dockerfile.v0\n<missing>      14 hours ago   RUN /bin/sh -c set -eux;  for src in idle3 p\u2026   16.4kB    buildkit.dockerfile.v0\n<missing>      14 hours ago   RUN /bin/sh -c set -eux;   savedAptMark=\"$(a\u2026   52.1MB    buildkit.dockerfile.v0\n<missing>      14 hours ago   ENV PYTHON_SHA256=bfb74ad39efae27cda510f134a\u2026   0B        buildkit.dockerfile.v0\n<missing>      14 hours ago   ENV PYTHON_VERSION=3.11.17                      0B        buildkit.dockerfile.v0\n<missing>      14 hours ago   ENV GPG_KEY=A035C8C19219BA821ECEA86B64E628F8\u2026   0B        buildkit.dockerfile.v0\n<missing>      14 hours ago   RUN /bin/sh -c set -eux;  apt-get update;  a\u2026   4.99MB    buildkit.dockerfile.v0\n<missing>      14 hours ago   ENV LANG=C.UTF-8                                0B        buildkit.dockerfile.v0\n<missing>      14 hours ago   ENV PATH=/usr/local/bin:/usr/local/sbin:/usr\u2026   0B        buildkit.dockerfile.v0\n<missing>      40 hours ago   # debian.sh --arch 'arm64' out/ 'trixie' '@1\u2026   110MB     debuerreotype 0.17",
+    "returncode": 0,
+    "time": "2026-10-06 21:18:45",
+    "section": "3. Explore Docker images and registries",
+    "title": "Image layers (history)",
+    "observation": "Every Dockerfile instruction creates a layer; this lists them with their sizes."
+  },
+  {
+    "command": "docker build -t dl-app:1.0 ./dl_app",
+    "output": "\n[stderr]\n#0 building with \"desktop-linux\" instance using docker driver\n\n#1 [internal] load build definition from Dockerfile\n#1 transferring dockerfile: 148B done\n#1 DONE 0.0s\n\n#2 [internal] load metadata for docker.io/library/python:3.11-slim\n#2 DONE 0.0s\n\n#3 [internal] load .dockerignore\n#3 transferring context: 2B done\n#3 DONE 0.0s\n\n#4 [internal] load build context\n#4 transferring context: 674B done\n#4 DONE 0.0s\n\n#5 [1/4] FROM docker.io/library/python:3.11-slim@sha256:0dd364ba7e10242f07755449e3a3d0e35f9efd987952737b90def6709ab0c5ce\n#5 resolve docker.io/library/python:3.11-slim@sha256:0dd364ba7e10242f07755449e3a3d0e35f9efd987952737b90def6709ab0c5ce 0.0s done\n#5 extracting sha256:bbeda6b4abb749f743f4547ef5a28070a14de8caef211daa5afb78d5b5fa21ba\n#5 extracting sha256:bbeda6b4abb749f743f4547ef5a28070a14de8caef211daa5afb78d5b5fa21ba 1.4s done\n#5 DONE 1.4s\n\n#5 [1/4] FROM docker.io/library/python:3.11-slim@sha256:0dd364ba7e10242f07755449e3a3d0e35f9efd987952737b90def6709ab0c5ce\n#5 extracting sha256:9eb0fb93ee0808559f67707773b41df45d2dd34a5b4aec77d2f7a6bc36d05a51 0.1s done\n#5 extracting sha256:73a63ac3ec4a2ac51ab19307c2a807cd83546a50407c2c52470ab27a240d648d\n#5 extracting sha256:73a63ac3ec4a2ac51ab19307c2a807cd83546a50407c2c52470ab27a240d648d 0.5s done\n#5 DONE 2.0s\n\n#5 [1/4] FROM docker.io/library/python:3.11-slim@sha256:0dd364ba7e10242f07755449e3a3d0e35f9efd987952737b90def6709ab0c5ce\n#5 extracting sha256:7ca0c331ecfd0200dc735b8a2ac2be32f9c43d5ea0945cbbaf98c04335fdeeb5 0.0s done\n#5 DONE 2.0s\n\n#6 [2/4] WORKDIR /app\n#6 DONE 0.9s\n\n#7 [3/4] RUN pip install --no-cache-dir numpy\n#7 1.900 Collecting numpy\n#7 2.016   Downloading numpy-2.4.6-cp311-cp311-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl.metadata (6.6 kB)\n#7 2.050 Downloading numpy-2.4.6-cp311-cp311-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl (16.0 MB)\n#7 5.481    \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501 16.0/16.0 MB 4.2 MB/s eta 0:00:00\n#7 5.557 Installing collected packages: numpy\n#7 7.350 Successfully installed numpy-2.4.6\n#7 7.350 WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv\n#7 7.442 \n#7 7.442 [notice] A new release of pip is available: 24.0 -> 26.2.1\n#7 7.442 [notice] To update, run: pip install --upgrade pip\n#7 DONE 7.6s\n\n#8 [4/4] COPY app.py .\n#8 DONE 0.0s\n\n#9 exporting to image\n#9 exporting layers\n#9 exporting layers 2.4s done\n#9 exporting manifest sha256:f199e40ff0715e54c75d43014eaeca496644a3e7d68c7754b8c76824884de3d5 done\n#9 exporting config sha256:22c9baabe670a037fced1dbf13b8b48ea2675e323c2ef9e04d86268989e73f6d done\n#9 exporting attestation manifest sha256:27bea9899e1c00ca8993bf970a9a47a3c07deecbc5275774f44bc81e31312600 done\n#9 exporting manifest list sha256:34d8650d4c166ed015da916d2feeb849735741166386ba77f644b8c7dec5489d done\n#9 naming to docker.io/library/dl-app:1.0 done\n#9 unpacking to docker.io/library/dl-app:1.0\n#9 unpacking to docker.io/library/dl-app:1.0 0.5s done\n#9 DONE 2.9s\n\nView build details: docker-desktop://dashboard/build/desktop-linux/desktop-linux/lx36dzav3rthmuxqjcs3mxmrp",
+    "returncode": 0,
+    "time": "2026-10-06 21:18:45",
+    "section": "3. Explore Docker images and registries",
+    "title": "Build a custom DL-style image from a Dockerfile",
+    "observation": "docker build reads the Dockerfile, executes each instruction as a cached layer, and tags the result dl-app:1.0."
+  },
+  {
+    "command": "docker run --rm dl-app:1.0",
+    "output": "Containerized DL inference app\nNumPy version : 2.4.6\nOutput shape  : (4, 3)\nPredicted classes: [2, 0, 0, 0]",
+    "returncode": 0,
+    "time": "2026-10-06 21:18:59",
+    "section": "3. Explore Docker images and registries",
+    "title": "Run the custom image",
+    "observation": "Runs the containerized NumPy neural-network inference; the container exits when the process finishes."
+  },
+  {
+    "command": "docker tag dl-app:1.0 yourdockerhubuser/dl-app:1.0 && docker images yourdockerhubuser/dl-app",
+    "output": "IMAGE                          ID             DISK USAGE   CONTENT SIZE   EXTRA\nyourdockerhubuser/dl-app:1.0   34d8650d4c16        324MB         70.7MB",
+    "returncode": 0,
+    "time": "2026-10-06 21:19:00",
+    "section": "3. Explore Docker images and registries",
+    "title": "Tag the image for a registry",
+    "observation": "Tagging prepares the image to be pushed with 'docker push' to a registry (replace yourdockerhubuser with your account)."
+  },
+  {
+    "command": "docker create --name lifecycle-demo python:3.11-slim sleep 600 && docker ps -a --filter name=lifecycle-demo --format 'table {{.Names}}\\t{{.Status}}'",
+    "output": "3817f42343b9146ec3087eb9de5ca0e848c11f3008808ccb3c2364487f8730b2\nNAMES            STATUS\nlifecycle-demo   Created",
+    "returncode": 0,
+    "time": "2026-10-06 21:19:00",
+    "section": "4. Container lifecycle operations",
+    "title": "Create a container without starting it",
+    "observation": "State: Created. The writable layer exists but no process is running."
+  },
+  {
+    "command": "docker start lifecycle-demo && docker ps --filter name=lifecycle-demo --format 'table {{.Names}}\\t{{.Status}}'",
+    "output": "lifecycle-demo\nNAMES            STATUS\nlifecycle-demo   Up Less than a second",
+    "returncode": 0,
+    "time": "2026-10-06 21:19:00",
+    "section": "4. Container lifecycle operations",
+    "title": "Start",
+    "observation": "State: Running."
+  },
+  {
+    "command": "docker pause lifecycle-demo && docker ps --filter name=lifecycle-demo --format 'table {{.Names}}\\t{{.Status}}'",
+    "output": "lifecycle-demo\nNAMES            STATUS\nlifecycle-demo   Up Less than a second (Paused)",
+    "returncode": 0,
+    "time": "2026-10-06 21:19:00",
+    "section": "4. Container lifecycle operations",
+    "title": "Pause",
+    "observation": "State: Paused. Processes are frozen using the cgroup freezer (memory is kept)."
+  },
+  {
+    "command": "docker unpause lifecycle-demo && docker ps --filter name=lifecycle-demo --format 'table {{.Names}}\\t{{.Status}}'",
+    "output": "lifecycle-demo\nNAMES            STATUS\nlifecycle-demo   Up Less than a second",
+    "returncode": 0,
+    "time": "2026-10-06 21:19:00",
+    "section": "4. Container lifecycle operations",
+    "title": "Unpause",
+    "observation": "Processes resume exactly where they stopped."
+  },
+  {
+    "command": "docker stop -t 2 lifecycle-demo && docker ps -a --filter name=lifecycle-demo --format 'table {{.Names}}\\t{{.Status}}'",
+    "output": "lifecycle-demo\nNAMES            STATUS\nlifecycle-demo   Exited (137) Less than a second ago",
+    "returncode": 0,
+    "time": "2026-10-06 21:19:00",
+    "section": "4. Container lifecycle operations",
+    "title": "Stop (graceful, SIGTERM then SIGKILL)",
+    "observation": "State: Exited. Docker sends SIGTERM, waits, then SIGKILL; the filesystem is kept."
+  },
+  {
+    "command": "docker restart lifecycle-demo && docker ps --filter name=lifecycle-demo --format 'table {{.Names}}\\t{{.Status}}'",
+    "output": "lifecycle-demo\nNAMES            STATUS\nlifecycle-demo   Up Less than a second",
+    "returncode": 0,
+    "time": "2026-10-06 21:19:03",
+    "section": "4. Container lifecycle operations",
+    "title": "Restart",
+    "observation": "Stop followed by start; the container returns to Running."
+  },
+  {
+    "command": "docker kill lifecycle-demo && docker ps -a --filter name=lifecycle-demo --format 'table {{.Names}}\\t{{.Status}}'",
+    "output": "lifecycle-demo\nNAMES            STATUS\nlifecycle-demo   Exited (137) Less than a second ago",
+    "returncode": 0,
+    "time": "2026-10-06 21:19:03",
+    "section": "4. Container lifecycle operations",
+    "title": "Kill (immediate SIGKILL)",
+    "observation": "Forces immediate termination, exit code 137 (128 + 9)."
+  },
+  {
+    "command": "docker run -d --name policy-demo --restart unless-stopped nginx:alpine && docker inspect --format 'RestartPolicy={{.HostConfig.RestartPolicy.Name}}' policy-demo",
+    "output": "9820d01540a0ea5504cc38c63862186f68536cbdae4bfcb95d41df3f64ad575b\nRestartPolicy=unless-stopped",
+    "returncode": 0,
+    "time": "2026-10-06 21:19:03",
+    "section": "4. Container lifecycle operations",
+    "title": "Restart policy demo",
+    "observation": "Restart policies (no, on-failure, always, unless-stopped) let the daemon restart containers automatically."
+  },
+  {
+    "command": "docker rm -f lifecycle-demo policy-demo && docker ps -a --format 'table {{.Names}}\\t{{.Status}}'",
+    "output": "lifecycle-demo\npolicy-demo\nNAMES     STATUS\ndl-web    Up 34 seconds",
+    "returncode": 0,
+    "time": "2026-10-06 21:19:03",
+    "section": "4. Container lifecycle operations",
+    "title": "Remove containers",
+    "observation": "docker rm deletes the container and its writable layer; the image remains."
+  },
+  {
+    "command": "docker network ls",
+    "output": "NETWORK ID     NAME      DRIVER    SCOPE\nb33fa5181019   bridge    bridge    local\n72b8645dfbf5   host      host      local\n678b92f8f1bc   none      null      local",
+    "returncode": 0,
+    "time": "2026-10-06 21:19:03",
+    "section": "5. Networking concepts",
+    "title": "List default networks",
+    "observation": "Default networks: bridge (default for containers), host and none."
+  },
+  {
+    "command": "docker network create dl-net",
+    "output": "f8d1ee575f52124fcc6f08736330fcf98f580b241fe1597dd85131ba46db9cf2",
+    "returncode": 0,
+    "time": "2026-10-06 21:19:03",
+    "section": "5. Networking concepts",
+    "title": "Create a user-defined bridge network",
+    "observation": "User-defined bridges provide automatic DNS-based service discovery between containers."
+  },
+  {
+    "command": "docker run -d --name backend --network dl-net nginx:alpine && docker run -d --name client --network dl-net alpine sleep 300",
+    "output": "7e18f3a36e6dd4c0e2a3eaca66447ec17c91ee426332cc3ffbf2dbd5cb2707de\n3a1c4faa024cea424d1f6111e2ad23ac25752c464679dc6f5333a06b138ff183\n\n[stderr]\nUnable to find image 'alpine:latest' locally\nlatest: Pulling from library/alpine\nec67817084c6: Download complete\n36c38f094eae: Download complete\nDigest: sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6\nStatus: Downloaded newer image for alpine:latest",
+    "returncode": 0,
+    "time": "2026-10-06 21:19:03",
+    "section": "5. Networking concepts",
+    "title": "Start two containers on the network",
+    "observation": "Both containers join dl-net and get private IP addresses."
+  },
+  {
+    "command": "docker exec client sh -c 'ping -c 2 backend && wget -qO- http://backend | head -n 4'",
+    "output": "PING backend (172.18.0.2): 56 data bytes\n64 bytes from 172.18.0.2: seq=0 ttl=64 time=0.404 ms\n64 bytes from 172.18.0.2: seq=1 ttl=64 time=0.191 ms\n\n--- backend ping statistics ---\n2 packets transmitted, 2 packets received, 0% packet loss\nround-trip min/avg/max = 0.191/0.297/0.404 ms\n<!DOCTYPE html>\n<html>\n<head>\n<title>Welcome to nginx!</title>",
+    "returncode": 0,
+    "time": "2026-10-06 21:19:08",
+    "section": "5. Networking concepts",
+    "title": "Container-to-container communication by name",
+    "observation": "The name 'backend' resolves through Docker's embedded DNS, proving container-to-container networking."
+  },
+  {
+    "command": "docker network inspect dl-net --format '{{range .Containers}}{{.Name}} -> {{.IPv4Address}}{{println}}{{end}}'",
+    "output": "client -> 172.18.0.3/16\nbackend -> 172.18.0.2/16",
+    "returncode": 0,
+    "time": "2026-10-06 21:19:09",
+    "section": "5. Networking concepts",
+    "title": "Inspect the network",
+    "observation": "Lists the containers attached to the network with their IP addresses."
+  },
+  {
+    "command": "docker volume create dl-data && docker volume ls --filter name=dl-data",
+    "output": "dl-data\nDRIVER    VOLUME NAME\nlocal     dl-data",
+    "returncode": 0,
+    "time": "2026-10-06 21:19:09",
+    "section": "6. Storage concepts (volumes and bind mounts)",
+    "title": "Create a named volume",
+    "observation": "Volumes are managed by Docker and live outside the container's writable layer."
+  },
+  {
+    "command": "docker run --rm -v dl-data:/data alpine sh -c \"echo 'model checkpoint v1' > /data/checkpoint.txt && ls -l /data\"",
+    "output": "total 4\n-rw-r--r--    1 root     root            20 Oct  6 15:49 checkpoint.txt",
+    "returncode": 0,
+    "time": "2026-10-06 21:19:09",
+    "section": "6. Storage concepts (volumes and bind mounts)",
+    "title": "Write data from one container",
+    "observation": "The container writes into the volume and is then deleted."
+  },
+  {
+    "command": "docker run --rm -v dl-data:/data alpine cat /data/checkpoint.txt",
+    "output": "model checkpoint v1",
+    "returncode": 0,
+    "time": "2026-10-06 21:19:09",
+    "section": "6. Storage concepts (volumes and bind mounts)",
+    "title": "Read the data from a NEW container (persistence)",
+    "observation": "The data survived container deletion, proving volume persistence (key for datasets and trained models)."
+  },
+  {
+    "command": "mkdir -p host_data && echo 'dataset sample from host' > host_data/sample.txt && docker run --rm -v \"$(pwd)/host_data:/mnt/host\" alpine cat /mnt/host/sample.txt",
+    "output": "dataset sample from host",
+    "returncode": 0,
+    "time": "2026-10-06 21:19:09",
+    "section": "6. Storage concepts (volumes and bind mounts)",
+    "title": "Bind mount a host folder",
+    "observation": "A bind mount maps a host directory into the container; changes are visible on both sides."
+  },
+  {
+    "command": "docker volume inspect dl-data --format 'Name={{.Name}} Driver={{.Driver}} Mountpoint={{.Mountpoint}}'",
+    "output": "Name=dl-data Driver=local Mountpoint=/var/lib/docker/volumes/dl-data/_data",
+    "returncode": 0,
+    "time": "2026-10-06 21:19:14",
+    "section": "6. Storage concepts (volumes and bind mounts)",
+    "title": "Inspect the volume",
+    "observation": "Shows where Docker stores the volume on the host."
+  },
+  {
+    "command": "docker rm -f dl-web backend client 2>&1; docker network rm dl-net; docker volume rm dl-data; docker ps -a --format 'table {{.Names}}\\t{{.Status}}'",
+    "output": "dl-web\nbackend\nclient\ndl-net\ndl-data\nNAMES     STATUS",
+    "returncode": 0,
+    "time": "2026-10-06 21:19:14",
+    "section": "7. Cleanup",
+    "title": "Remove all demo resources",
+    "observation": "Cleaning up avoids leftover containers, networks and volumes."
+  }
+]
